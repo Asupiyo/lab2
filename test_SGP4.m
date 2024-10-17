@@ -81,7 +81,7 @@ tsince = 1440; % amount of time in which you are going to propagate satellite's 
 [rteme, vteme] = sgp4(tsince, satdata);
 
 % read Earth orientation parameters
-fid = fopen('EOP-All.txt','r');
+fid = fopen('eop.txt','r');
 %  ----------------------------------------------------------------------------------------------------
 % |  Date    MJD      x         y       UT1-UTC      LOD       dPsi    dEpsilon     dX        dY    DAT
 % |(0h UTC)           "         "          s          s          "        "          "         "     s 
