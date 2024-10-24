@@ -6,7 +6,7 @@ J2 = 1.08263e-3;  % J2摂動項
 
 % 軌道要素
 a = 7000e3;  % 軌道半径 (m)
-e = 0.01;    % 離心率
+e = 0.000528;    % 離心率
 i = deg2rad(45);  % 軌道傾斜 (rad)
 raan = deg2rad(0);  % 昇交点経度 (rad)
 argp = deg2rad(0);  % 近地点引数 (rad)
@@ -15,11 +15,11 @@ argp = deg2rad(0);  % 近地点引数 (rad)
 n = sqrt(G * M / a^3);  % 平均運動 (rad/s)
 
 % BSTAR抗力項の設定
-bstar = 1.0e-5;  % BSTAR (kg/m^2)
+bstar = 0.74395e-4;  % BSTAR (kg/m^2)
 
 % 軌道計算関数
 
-function [positions, n_dot] = simulate_orbit(n, e, a, raan, argp, i, t_end, dt, bstar, J2)
+function [positions, n_dot] = simulate_orbit(n, e, a, raan, argp, i, t_end, dt)
 % 定数
 G = 6.67430e-11;  % 重力定数 (m^3 kg^-1 s^-2)
 M = 5.972e24;     % 地球の質量 (kg)
@@ -58,7 +58,7 @@ end
 % シミュレーション
 t_end = 6000;
 dt = 10;
-[positions, n_dot] = simulate_orbit(n, e, a, raan, argp, i, t_end, dt, bstar, J2);  % 6000秒のシミュレーション
+[positions, n_dot] = simulate_orbit(n, e, a, raan, argp, i, t_end, dt);  % 6000秒のシミュレーション
 
 % t=3000の地点での値を出力
 target_time = 3000;
@@ -67,14 +67,5 @@ target_index = find(0:dt:t_end == target_time);
 fprintf('At t = %d seconds:\n', target_time);
 fprintf('BSTAR: %.2e kg/m^2\n', bstar);
 fprintf('Eccentricity: %.4f\n', e);
-fprintf('Average Motion Change: %.6f rad/s^2\n', n_dot(target_index));
+fprintf('Average Motion Change: %.7f rad/s^2\n', n_dot(target_index));
 
-% 結果のプロット
-figure;
-plot3(positions(:, 1), positions(:, 2), positions(:, 3));
-xlabel('X (m)');
-ylabel('Y (m)');
-zlabel('Z (m)');
-title('Orbital Simulation with J2 Perturbation');
-grid on;
-axis equal;
