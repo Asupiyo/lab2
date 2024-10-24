@@ -1,4 +1,4 @@
-url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=gnss&FORMAT=tle'; 
+url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=oneweb&FORMAT=tle'; 
 tleData = webread(url);
 
 lines = strsplit(tleData, '\n');
