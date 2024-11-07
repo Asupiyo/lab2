@@ -1,6 +1,6 @@
 % Constellation from openExample('aero/ModelGalileoConstellAsWalkerDeltaConstellExample'):
 sc = satelliteScenario;
-sat = walkerDelta(sc, 29599.8e3, 56, 24, 3, 1, ArgumentOfLatitude=15, Name="Galileo");
+sat = walkerDelta(sc, 7000e3, 45, 24, 3, 1, ArgumentOfLatitude=15, Name="Galileo");
 
 % Initialise:
 N = length(sat);
@@ -15,9 +15,9 @@ end
 
 % Generate TLE from satellite:
 function TLE = getTLE(satellite)
-amc = '-.00027820';
+amc = '-.00027817';
 bstar = '+74395-5';
-E = '0005280';
+E = '5000000';
 %% Line 1:
 
 % ID:

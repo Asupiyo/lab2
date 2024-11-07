@@ -126,9 +126,29 @@ T = (MJD_TT-const.MJD_J2000)/36525;
 [reci, veci] = teme2eci(rteme,vteme,T,dpsi,deps)
 [recef,vecef] = teme2ecef(rteme,vteme,T,MJD_UT1+2400000.5,LOD,x_pole,y_pole,2)
 [rtod, vtod] = ecef2tod(recef,vecef,T,MJD_UT1+2400000.5,LOD,x_pole,y_pole,2,dpsi,deps)
-fprintf('Ephemeris in the True Equator Mean Equinox coordinate system based on the epoch of the specified TLE.\n');
-fprintf('     TSINCE              X                Y                Z     [km]\n');
-fprintf(' %9.1f%22.8f%18.8f%18.8f \n',tsince,rteme(1),rteme(2),rteme(3));
-fprintf('                       XDOT             YDOT             ZDOT    [km/s]\n');
-fprintf('  %28.8f%18.8f%18.8f \n\n',vteme(1),vteme(2),vteme(3));
+
+% tsinceの範囲を設定
+tsince_values = 1:10:10001; % 100刻みで1000から2000までの値
+
+% 結果を保存するための行列を初期化
+rteme_results = zeros(length(tsince_values), 3); % 位置ベクトル (X, Y, Z) の保存
+vteme_results = zeros(length(tsince_values), 3); % 速度ベクトル (XDOT, YDOT, ZDOT) の保存
+
+% 各tsince値に対してSGP4計算を実行
+for k = 1:length(tsince_values)
+    tsince = tsince_values(k);
+    [rteme, vteme] = sgp4(tsince, satdata);
+    
+    % 結果を行列に保存
+    rteme_results(k, :) = rteme*1000;
+    vteme_results(k, :) = vteme*1000;
+end
+rteme_xy = rteme_results(:,1:2);
+vteme_xy = vteme_results(:,1:2);
+
+% 結果の表示
+disp('位置ベクトル (rteme_results) [m]:');
+disp(rteme_results);
+disp('速度ベクトル (vteme_results) [m/s]:');
+disp(vteme_results);
 
