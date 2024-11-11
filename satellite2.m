@@ -72,12 +72,3 @@ for i=1:t_end
     velocities_range = velocities(:,:);
 end
 
-% 軌道の3Dプロット
-figure;
-plot(positions(:,1), positions(:,2), 'b');
-xlabel('X (m)');
-ylabel('Y (m)');
-zlabel('Z (m)');
-title(['離心率 e = ', num2str(e), ' の軌道']);
-grid on;
-
