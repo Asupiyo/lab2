@@ -3,18 +3,18 @@ positionData = positions_range(:,:);
 velocityData = velocities_range(:,:);
 
 % 正規化のための最小値と最大値の取得
-PposMin = min(positionData,[],1);
-PposMax = max(positionData,[],1);
-PvelMin = min(velocityData,[],1);
-PvelMax = max(velocityData,[],1);
+posMin = min(positionData,[],1);
+posMax = max(positionData,[],1);
+velMin = min(velocityData,[],1);
+velMax = max(velocityData,[],1);
 
-PpositionDataNorm = (positionData - PposMin) ./ (PposMax - PposMin);
-PvelocityDataNorm = (velocityData - PvelMin) ./ (PvelMax - PvelMin);
+positionDataNorm = (positionData - posMin) ./ (posMax - posMin);
+velocityDataNorm = (velocityData - velMin) ./ (velMax - velMin);
 
 % 入力とターゲットの設定
 %batchNorm
-inputData = [PpositionDataNorm(1:end-1,:), PvelocityDataNorm(1:end-1,:)]';
-targetData = PpositionDataNorm(2:end,:)';
+inputData = [positionDataNorm(1:end-1,:), velocityDataNorm(1:end-1,:)]';
+targetData = positionDataNorm(2:end,:)';
 
 % LSTMネットワークのレイヤー設計
 inputSize = 6;
