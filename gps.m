@@ -1,4 +1,4 @@
-startTime = datetime(2020,5,1,11,36,0);
+startTime = datetime(2024,11,14,14,38,0);
 stopTime = startTime + days(1);
 sampleTime = 60;
 sc = satelliteScenario(startTime,stopTime,sampleTime);
@@ -16,7 +16,11 @@ rightAscensionOfAscendingNode = 95;
 argumentOfPeriapsis = 93;
 trueAnomaly = 0;
 sat2 = satellite(sc,semiMajorAxis,eccentricity,inclination,rightAscensionOfAscendingNode,argumentOfPeriapsis,trueAnomaly);
+trueAnomaly = 180;
+sat3 = satellite(sc,semiMajorAxis,eccentricity,inclination,rightAscensionOfAscendingNode,argumentOfPeriapsis,trueAnomaly);
 ac2 = access(sat2,gs);
+ac3 = access(sat3,gs);
 intvls = accessIntervals(ac);
 sat2.MarkerColor = [1, 0, 0];
+sat3.MarkerColor = [1,1,0];
 play(sc);
