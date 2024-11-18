@@ -1,4 +1,4 @@
-startTime = datetime(2024,11,14,14,38,0);
+startTime = datetime(2024,11,18,14,38,0);
 stopTime = startTime + days(1);
 sampleTime = 60;
 sc = satelliteScenario(startTime,stopTime,sampleTime);
