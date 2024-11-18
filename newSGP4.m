@@ -128,7 +128,7 @@ T = (MJD_TT-const.MJD_J2000)/36525;
 [rtod, vtod] = ecef2tod(recef,vecef,T,MJD_UT1+2400000.5,LOD,x_pole,y_pole,2,dpsi,deps)
 
 % tsinceの範囲を設定
-tsince_values = 1:10:10001; % 100刻みで1000から2000までの値
+tsince_values = 1:1:10000; % 100刻みで1000から2000までの値
 
 % 結果を保存するための行列を初期化
 rteme_results = zeros(length(tsince_values), 3); % 位置ベクトル (X, Y, Z) の保存

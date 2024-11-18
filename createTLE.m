@@ -16,8 +16,8 @@ end
 % Generate TLE from satellite:
 function TLE = getTLE(satellite)
 amc = '-.00027817';
-bstar = '+74395-5';
-E = '5000000';
+bstar = '+26400-5';
+E = '3333300';
 %% Line 1:
 
 % ID:
