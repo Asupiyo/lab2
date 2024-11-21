@@ -6,9 +6,11 @@ sc = satelliteScenario(startTime,stopTime,sampleTime);
 
 % 地上局リスト
 groundStations = [
-    struct('Lat', 35.6895, 'Lon', 139.6917, 'Alt', 50), % 東京
-    struct('Lat', 43.0642, 'Lon', 141.3468, 'Alt', 20), % 札幌
-    struct('Lat', 26.2124, 'Lon', 127.6809, 'Alt', 30)  % 沖縄
+    struct('Lat', 35.6895, 'Lon', 139.6917, 'Alt', 50); % 東京
+    struct('Lat', 43.0642, 'Lon', 141.3468, 'Alt', 20); % 札幌
+    struct('Lat', 26.2124, 'Lon', 127.6809, 'Alt', 30);  % 沖縄
+    struct('Lat',35.8818,'Lon',139.828395,'Alt',4.7);
+    struct('Lat',34.8393,'Lon',134.694,'Alt',50.8)
 ];
 
 % 地上局の追加
@@ -18,13 +20,35 @@ for i = 1:length(groundStations)
     gsList = [gsList; gs];
 end
 
-% ユーザー定義衛星リスト
-satelliteParams = [
-    struct('SemiMajorAxis', 7371000, 'Eccentricity', 0.01, 'Inclination', 52, ...
-           'RAAN', 95, 'ArgPeriapsis', 93, 'TrueAnomaly', 0, 'Color', [1, 0, 0]),
-    struct('SemiMajorAxis',8000000, 'Eccentricity',0.01, 'Inclination', 33,...
-            'RAAN',33,'ArgPeriapsis',33,'TrueAnomaly', 33, 'Color', [1, 1, 0])
-];
+numOrbits = 36; % 軌道の数
+semiMajorAxisBase = 7200000; % 基本の軌道長半径 (m)
+eccentricityBase = 0.01; % 基本の離心率
+inclinationBase = 70; % 基本の傾斜角 (度)
+
+% 色を定義 (色を36色生成)
+colors = jet(numOrbits); % Jetカラーマップを利用
+
+satelliteParams = struct();
+
+for i = 1:numOrbits
+    % パラメータを計算
+    semiMajorAxis = semiMajorAxisBase; % 軌道長半径を少しずつ増加
+    eccentricity = eccentricityBase; % 一定
+    inclination = inclinationBase; % 傾斜角は一定 (70度)
+    raan = randi([0,359]); % RAANを増加させて360度で折り返し
+    argPeriapsis = randi([0,359]); % 近地点引数も増加
+    trueAnomaly = randi([0,359]); % 真近点離角も増加
+    color = colors(i, :); % 色を割り当て
+    
+    % i番目の構造体を作成して、構造体配列に代入
+    satelliteParams(i).SemiMajorAxis = semiMajorAxis;
+    satelliteParams(i).Eccentricity = eccentricity;
+    satelliteParams(i).Inclination = inclination;
+    satelliteParams(i).RAAN = raan;
+    satelliteParams(i).ArgPeriapsis = argPeriapsis;
+    satelliteParams(i).TrueAnomaly = trueAnomaly;
+    satelliteParams(i).Color = color;
+end
 
 % 衛星の追加とアクセス計算
 satList = [];
@@ -69,13 +93,14 @@ for gsIdx = 1:length(gsList) % 各地上局に対して
 end
 end
 
-fprintf("\n=== アクセス情報 ===\n");
-for i = 1:length(accessData)
-    fprintf("Satellite %d <-> GroundStation %d:\n", ...
-        accessData{i}.Satellite, accessData{i}.GroundStation);
-    disp(accessData{i}.Intervals);
-end
+%fprintf("\n=== アクセス情報 ===\n");
+%for i = 1:length(accessData)
+%    fprintf("Satellite %d <-> GroundStation %d:\n", ...
+%        accessData{i}.Satellite, accessData{i}.GroundStation);
+%    disp(accessData{i}.Intervals);
+%end
 
+play(sc);
 %めも
 %観測期間中の疑似距離を計算
 %ちょっと時間がかかる
