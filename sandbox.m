@@ -20,7 +20,7 @@ for i = 1:length(groundStations)
     gsList = [gsList; gs];
 end
 
-numOrbits = 36; % 軌道の数
+numOrbits = 5; % 軌道の数
 semiMajorAxisBase = 7200000; % 基本の軌道長半径 (m)
 eccentricityBase = 0.01; % 基本の離心率
 inclinationBase = 70; % 基本の傾斜角 (度)
@@ -73,6 +73,8 @@ for i = 1:length(satelliteParams)
         accessData{end+1} = struct('Satellite', i, 'GroundStation', j, 'Intervals', intvls);
     end
 end
+satelliteData = cell(numOrbits,1);
+prvecs = zeros(length(gsList),length(timeSteps));
 for satIdx = 1:length(satList)
 for gsIdx = 1:length(gsList) % 各地上局に対して
     gsPos = [groundStations(gsIdx).Lat, groundStations(gsIdx).Lon, groundStations(gsIdx).Alt];
@@ -88,9 +90,11 @@ for gsIdx = 1:length(gsList) % 各地上局に対して
             [prvec, adrvec] = genrng(1, gsPos, svmat_t, i, t * elapsedTime, 0);
              fprintf('受信機%dの衛星%dに対する%sでの疑似距離は、%s\n',gsIdx,satIdx,currentT, prvec);
              currentT = currentT + seconds(sampleTime);
+             prvecs(gsIdx,elapsedTime) = prvec;
         end
     end
 end
+satelliteData{satIdx,1} = prvecs;
 end
 
 %fprintf("\n=== アクセス情報 ===\n");
