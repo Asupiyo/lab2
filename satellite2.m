@@ -6,7 +6,7 @@ J2 = 1.08263e-3;  % J2摂動項
 
 % 軌道要素
 a = 7000e3;  % 軌道半径 (m)
-e = 0.001;    % 離心率
+e = 0.5;    % 離心率
 i = deg2rad(45);  % 軌道傾斜 (rad)
 raan = deg2rad(0);  % 昇交点経度 (rad)
 argp = deg2rad(0);  % 近地点引数 (rad)
@@ -14,6 +14,8 @@ argp = deg2rad(0);  % 近地点引数 (rad)
 % 平均運動の計算
 n = sqrt(G * M / a^3);  % 平均運動 (rad/s)
 
+% BSTAR抗力項の設定
+bstar = 0.74395e-4;  % BSTAR (kg/m^2)
 
 % 軌道計算関数
 function [positions, velocities, n_dot] = simulate_orbit(n, e, a, raan, argp, i, t_end, dt)
@@ -69,29 +71,3 @@ for i=1:t_end
     positions_range = positions(:,:);
     velocities_range = velocities(:,:);
 end
-
-% 定数
-G = 6.67430e-11;
-M = 5.972e24;
-mu = G * M;
-
-% 例として初期位置と速度ベクトル
-r = positions(1, :);
-v = velocities(1, :);
-
-% 離心率ベクトルの計算
-e_vec = (cross(v, cross(r, v)) / mu) - (r / norm(r));
-e = norm(e_vec);
-
-% 抗力係数などの仮定
-Cd = 2.2;  % 抗力係数
-A = 3;     % 衛星の断面積 (m^2)
-m = 500;   % 衛星の質量 (kg)
-rho = 4.0e-13;  % 仮定高度での空気密度 (kg/m^3)
-
-% BSTARの計算
-BSTAR = 0.5 * Cd * A * rho / m;
-
-% 結果の表示
-disp(['離心率 e = ', num2str(e)]);
-disp(['BSTAR = ', num2str(BSTAR)]);
