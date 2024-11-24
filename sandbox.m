@@ -6,7 +6,7 @@ sc = satelliteScenario(startTime,stopTime,sampleTime);
 
 % 地上局リスト
 groundStations = [
-    struct('Lat', 35.6895, 'Lon', 139.6917, 'Alt', 50); % 東京
+    struct('Lat', 35.6722116666667, 'Lon', 139.528622277778, 'Alt', 50); % 東京
     struct('Lat', 43.0642, 'Lon', 141.3468, 'Alt', 20); % 札幌
     struct('Lat', 26.2124, 'Lon', 127.6809, 'Alt', 30);  % 沖縄
     struct('Lat',35.8818,'Lon',139.828395,'Alt',4.7);
@@ -20,7 +20,7 @@ for i = 1:length(groundStations)
     gsList = [gsList; gs];
 end
 
-numOrbits = 5; % 軌道の数
+numOrbits = 1; % 軌道の数
 semiMajorAxisBase = 7200000; % 基本の軌道長半径 (m)
 eccentricityBase = 0.01; % 基本の離心率
 inclinationBase = 70; % 基本の傾斜角 (度)
@@ -63,8 +63,9 @@ for i = 1:length(satelliteParams)
        timeSteps = startTime:seconds(sampleTime):stopTime;  
         for t = 1:length(timeSteps)
             currentTime = timeSteps(t);
-            [pos, ~] = states(sat, currentTime); % 衛星の位置と速度
+            [pos, vel] = states(sat, currentTime); % 衛星の位置と速度
             svmat(i, :, t) = pos; % svmatに位置を格納
+            svvmat(i,:,t) = vel;
         end
     
     for j = 1:length(gsList)
@@ -73,8 +74,11 @@ for i = 1:length(satelliteParams)
         accessData{end+1} = struct('Satellite', i, 'GroundStation', j, 'Intervals', intvls);
     end
 end
-satelliteData = cell(numOrbits,1);
+satellitePosData = cell(numOrbits,1);
+satelliteVelData = cell(numOrbits,1);
 prvecs = zeros(length(gsList),length(timeSteps));
+vrvec = zeros(length(gsList),length(timeSteps));
+vrvecs = cell(size(vrvec));
 for satIdx = 1:length(satList)
 for gsIdx = 1:length(gsList) % 各地上局に対して
     gsPos = [groundStations(gsIdx).Lat, groundStations(gsIdx).Lon, groundStations(gsIdx).Alt];
@@ -87,14 +91,17 @@ for gsIdx = 1:length(gsList) % 各地上局に対して
         while currentT <= endT
             elapsedTime = seconds(currentT-startTime)/sampleTime; 
             svmat_t = squeeze(svmat(satIdx, :, elapsedTime)); % 衛星の位置 [1 x 3]
+            svvmat_t = squeeze(svvmat(satIdx,:,elapsedTime));
             [prvec, adrvec] = genrng(1, gsPos, svmat_t, i, t * elapsedTime, 0);
              fprintf('受信機%dの衛星%dに対する%sでの疑似距離は、%s\n',gsIdx,satIdx,currentT, prvec);
              currentT = currentT + seconds(sampleTime);
              prvecs(gsIdx,elapsedTime) = prvec;
+             vrvecs(gsIdx,elapsedTime) = {svvmat_t};
         end
     end
 end
-satelliteData{satIdx,1} = prvecs;
+satellitePosData{satIdx,1} = prvecs;
+satelliteVelData{satIdx,1} = vrvecs;%観測期間中だけの速度を入れたい(できた)&そもそも受信機が速度を図ることはできる？
 end
 
 %fprintf("\n=== アクセス情報 ===\n");
