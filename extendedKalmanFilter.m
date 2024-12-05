@@ -34,7 +34,8 @@ for satIdx = 1:numOrbits
             gsPos = [groundStations(gsIdx).Lat, ...
                      groundStations(gsIdx).Lon, ...
                      groundStations(gsIdx).Alt];
-            svxyzmat(gsIdx, :) = llh2xyz(gsPos);%ECEFに変換(llh2xyz)
+            [x,y,z] = geodetic2ecef(wgs84Ellipsoid,gsPos(1),gsPos(2),gsPos(3));%ECEFに変換(llh2xyz)
+            svxyzmat(gsIdx, [1,2,3]) = [x,y,z];
             if prvecAtStart(gsIdx,1) ~= 0
                 count =count + 1;
             end

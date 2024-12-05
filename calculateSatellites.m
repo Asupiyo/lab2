@@ -1,4 +1,4 @@
-function [gsList,satellitePosData, satelliteVelData] = calculateSatellites(startTime, stopTime, sampleTime, groundStations, satelliteParams) 
+function [gsList,satellitePosData, satelliteVelData,svmat] = calculateSatellites(startTime, stopTime, sampleTime, groundStations, satelliteParams) 
 sc = satelliteScenario(startTime, stopTime, sampleTime);
 
 gsList = [];
@@ -10,10 +10,11 @@ end
 svxyzmat = zeros(length(gsList), 3);
 
 for gsIdx = 1:length(gsList)
-      gsPos = [groundStations(gsIdx).Lat, ...
+      gspos = [groundStations(gsIdx).Lat, ...
                groundStations(gsIdx).Lon, ...
                groundStations(gsIdx).Alt];
-      svxyzmat(gsIdx, :) = llh2xyz(gsPos);%ECEFに変換(llh2xyz)
+               [x,y,z]= geodetic2ecef(wgs84Ellipsoid,gspos(1),gspos(2),gspos(3));%ECEFに変換(llh2xyz)
+               svxyzmat(gsIdx, 1:3) = [x,y,z]; 
 end
 
 % 衛星の追加とアクセス計算
@@ -29,7 +30,7 @@ for i = 1:length(satelliteParams)
     timeSteps = startTime:seconds(sampleTime):stopTime;  
     for t = 1:length(timeSteps)
         currentTime = timeSteps(t);
-        [pos, vel] = states(sat, currentTime); % 衛星の位置と速度
+        [pos, vel] = states(sat, currentTime,"CoordinateFrame","ecef"); % 衛星の位置と速度
         svmat(i, :, t) = pos; % svmatに位置を格納
         svvmat(i,:,t) = vel;
     end
@@ -52,7 +53,7 @@ prvecs = zeros(length(gsList), length(timeSteps));
 vrvec = zeros(length(gsList), length(timeSteps));
 vrvecs = cell(size(vrvec));
     for gsIdx = 1:length(gsList)  % 各地上局に対して
-        gsPos = [groundStations(gsIdx).Lat, groundStations(gsIdx).Lon, groundStations(gsIdx).Alt];
+        gsPos = svxyzmat(gsIdx,:);
         starttime = datetime(startTime, 'TimeZone', 'UTC');  % UTCに設定
         
         % 衛星ごとのアクセス間隔を取得
@@ -78,5 +79,3 @@ vrvecs = cell(size(vrvec));
 satellitePosData{satIdx,1} = prvecs;
 satelliteVelData{satIdx,1} = vrvecs;%観測期間中だけの速度を入れたい(できた)&そもそも受信機が速度を図ることはできる？
 end
-
-

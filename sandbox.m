@@ -10,13 +10,13 @@ groundStations = [
     struct('Lat', 26.2124, 'Lon', 127.6809, 'Alt', 30);  % 沖縄
     struct('Lat',35.8818,'Lon',139.828395,'Alt',4.7);
     struct('Lat',34.8393,'Lon',134.694,'Alt',50.8)
-    struct('Lat',39.86627,'Lon',116.378174,'Alt',0);
-    struct('Lat',-33.985502,'Lon',151.171875,'Alt',0);
-
+    struct('Lat',39.86627,'Lon',116.378174,'Alt',0);%北京
+    struct('Lat',-33.985502,'Lon',151.171875,'Alt',0);%シドニー
+    struct('Lat',19.482129,'Lon',-155.545903,'Alt',0);%太平洋
 ];
 
 numOrbits = 1; % 軌道の数
-semiMajorAxisBase = 7200000; % 基本の軌道長半径 (m)
+semiMajorAxisBase = 8000000; % 基本の軌道長半径 (m)
 eccentricityBase = 0.01; % 基本の離心率
 inclinationBase = 70; % 基本の傾斜角 (度)
 
@@ -30,9 +30,9 @@ for i = 1:numOrbits
     semiMajorAxis = semiMajorAxisBase; % 軌道長半径を少しずつ増加
     eccentricity = eccentricityBase; % 一定
     inclination = inclinationBase; % 傾斜角は一定 (70度)
-    raan = randi([0,359]); % RAANを増加させて360度で折り返し
-    argPeriapsis = randi([0,359]); % 近地点引数も増加
-    trueAnomaly = randi([0,359]); % 真近点離角も増加
+    raan = 100;%randi([0,359]); % RAANを増加させて360度で折り返し
+    argPeriapsis = 100;%randi([0,359]); % 近地点引数も増加
+    trueAnomaly = 100;%randi([0,359]); % 真近点離角も増加
     color = colors(i, :); % 色を割り当て
     
     % i番目の構造体を作成して、構造体配列に代入
@@ -45,7 +45,7 @@ for i = 1:numOrbits
     satelliteParams(i).Color = color;
 end
 
-[gsList,satpos,satvel]=calculateSatellites(startTime,stopTime,sampleTime,groundStations,satelliteParams);
+[gsList,satpos,satvel,truepos]=calculateSatellites(startTime,stopTime,sampleTime,groundStations,satelliteParams);
 
 % サンプルのセル配列（各要素がベクトル）
 A = satvel{1};
