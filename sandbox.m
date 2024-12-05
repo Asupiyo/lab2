@@ -1,8 +1,7 @@
-% 時間設定
+clear all
 startTime = datetime(2024,11,20,15,00,0);
 stopTime = startTime + days(1);
-sampleTime = 60;
-sc = satelliteScenario(startTime,stopTime,sampleTime);
+sampleTime = 10;
 
 % 地上局リスト
 groundStations = [
@@ -11,14 +10,10 @@ groundStations = [
     struct('Lat', 26.2124, 'Lon', 127.6809, 'Alt', 30);  % 沖縄
     struct('Lat',35.8818,'Lon',139.828395,'Alt',4.7);
     struct('Lat',34.8393,'Lon',134.694,'Alt',50.8)
-];
+    struct('Lat',39.86627,'Lon',116.378174,'Alt',0);
+    struct('Lat',-33.985502,'Lon',151.171875,'Alt',0);
 
-% 地上局の追加
-gsList = [];
-for i = 1:length(groundStations)
-    gs = groundStation(sc, groundStations(i).Lat, groundStations(i).Lon, Altitude=groundStations(i).Alt);
-    gsList = [gsList; gs];
-end
+];
 
 numOrbits = 1; % 軌道の数
 semiMajorAxisBase = 7200000; % 基本の軌道長半径 (m)
@@ -50,73 +45,28 @@ for i = 1:numOrbits
     satelliteParams(i).Color = color;
 end
 
-% 衛星の追加とアクセス計算
-satList = [];
-accessData = {};
-for i = 1:length(satelliteParams)
-    sat = satellite(sc, satelliteParams(i).SemiMajorAxis, satelliteParams(i).Eccentricity, ...
-        satelliteParams(i).Inclination, satelliteParams(i).RAAN, ...
-        satelliteParams(i).ArgPeriapsis, satelliteParams(i).TrueAnomaly);
-    sat.MarkerColor = satelliteParams(i).Color;
-    satList = [satList; sat];
+[gsList,satpos,satvel]=calculateSatellites(startTime,stopTime,sampleTime,groundStations,satelliteParams);
 
-       timeSteps = startTime:seconds(sampleTime):stopTime;  
-        for t = 1:length(timeSteps)
-            currentTime = timeSteps(t);
-            [pos, vel] = states(sat, currentTime); % 衛星の位置と速度
-            svmat(i, :, t) = pos; % svmatに位置を格納
-            svvmat(i,:,t) = vel;
-        end
-    
-    for j = 1:length(gsList)
-        ac = access(sat, gsList(j));
-        intvls = accessIntervals(ac);
-        accessData{end+1} = struct('Satellite', i, 'GroundStation', j, 'Intervals', intvls);
+% サンプルのセル配列（各要素がベクトル）
+A = satvel{1};
+
+% 各列の要素を同じインデックスで平均を取る
+numRows = size(A, 1);  % 行数
+numCols = size(A, 2);  % 列数
+
+% 結果を格納するためのセル配列
+meanResults = cell(1, numCols);
+for colIdx = 1:numCols
+    % 各列のベクトルを取り出し、同じインデックスの要素ごとに平均を取る
+    tempVec = cell2mat(A(:, colIdx));  % 各列のベクトルを数値配列に変換
+    meanResults{colIdx} = mean(tempVec, 1);  % 各列のインデックスごとに平均を取る
+end
+
+for i=1:numel(meanResults)
+    if isempty(meanResults{i})
+        meanResults{i} = 0;
     end
 end
-satellitePosData = cell(numOrbits,1);
-satelliteVelData = cell(numOrbits,1);
-prvecs = zeros(length(gsList),length(timeSteps));
-vrvec = zeros(length(gsList),length(timeSteps));
-vrvecs = cell(size(vrvec));
-for satIdx = 1:length(satList)
-for gsIdx = 1:length(gsList) % 各地上局に対して
-    gsPos = [groundStations(gsIdx).Lat, groundStations(gsIdx).Lon, groundStations(gsIdx).Alt];
-    startTime = datetime(startTime, 'TimeZone', 'UTC');  % UTCに設定
-    %currentT = datetime(currentT, 'TimeZone', 'UTC');    % UTCに設定
-    for i=1:size(intvls,1)
-        startT = intvls{i,'StartTime'};
-        endT = intvls{i,'EndTime'};
-        currentT = startT;
-        while currentT <= endT
-            elapsedTime = seconds(currentT-startTime)/sampleTime; 
-            svmat_t = squeeze(svmat(satIdx, :, elapsedTime)); % 衛星の位置 [1 x 3]
-            svvmat_t = squeeze(svvmat(satIdx,:,elapsedTime));
-            [prvec, adrvec] = genrng(1, gsPos, svmat_t, i, t * elapsedTime, 0);
-             fprintf('受信機%dの衛星%dに対する%sでの疑似距離は、%s\n',gsIdx,satIdx,currentT, prvec);
-             currentT = currentT + seconds(sampleTime);
-             prvecs(gsIdx,elapsedTime) = prvec;
-             vrvecs(gsIdx,elapsedTime) = {svvmat_t};
-        end
-    end
-end
-satellitePosData{satIdx,1} = prvecs;
-satelliteVelData{satIdx,1} = vrvecs;%観測期間中だけの速度を入れたい(できた)&そもそも受信機が速度を図ることはできる？
-end
 
-%fprintf("\n=== アクセス情報 ===\n");
-%for i = 1:length(accessData)
-%    fprintf("Satellite %d <-> GroundStation %d:\n", ...
-%        accessData{i}.Satellite, accessData{i}.GroundStation);
-%    disp(accessData{i}.Intervals);
-%end
 
-play(sc);
-%めも
-%観測期間中の疑似距離を計算
-%ちょっと時間がかかる
-%軌道をいい感じに配置するの難しい(いくつかは実際のLEO衛星の軌道をまねて作成する予定)
-%今後はこの疑似距離を使ってEKFで軌道を計算、LSTMで軌道の予測、評価
-%EKFには初期値が必要(t=0の時の衛星の位置を初期値とする)
-%初期値の計算にはGPS→受信機の逆(受信機→LEO衛星)を行う
-%ノイズは毎回変わる
+
