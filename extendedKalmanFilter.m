@@ -45,7 +45,7 @@ for satIdx = 1:numOrbits
             validIdx = all(prvecAtStart ~= 0,2);
             prvecValid = prvecAtStart(validIdx,:);
             svxyzmatValid = svxyzmat(validIdx,:);
-            estusr = olspos(prvecValid,svxyzmatValid);
+            estusr = olspos(prvecValid,svxyzmatValid,measureStates([1,3,5],j-1));
 
             % 推定された位置を衛星ごとのリストに追加
             %satelliteEstimatedPositions{1,j} = estusr(1,1:3);  % 位置推定結果を追加
