@@ -1,4 +1,4 @@
-function [satellitePosData, satelliteVelData,svmat] = calculateSatellites(startTime, stopTime, sampleTime, gsList, sat) 
+function [satellitePosData, satelliteVelData,svmat,accessData] = calculateSatellites(startTime, stopTime, sampleTime, gsList, sat) 
 
 
 svxyzmat = zeros(length(gsList), 3);
@@ -55,14 +55,16 @@ vrvecs = cell(size(vrvec));
             currentT = startT;
             while currentT <= endT
                 elapsedTime = seconds(currentT - starttime) / sampleTime; 
+                if elapsedTime ~= 0
                 svmat_t = squeeze(svmat(satIdx, :, elapsedTime)); % 衛星の位置 [1 x 3]
                 vrvec = squeeze(svvmat(satIdx, :, elapsedTime));
                 [prvec, ~] = genrng(1, gsPos, svmat_t, satIdx, t * elapsedTime, 0);
-                
-                %fprintf('受信機%dの衛星%dに対する%sでの疑似距離は、%s\n', gsIdx, satIdx, currentT, prvec);
-                currentT = currentT + seconds(sampleTime);
                 prvecs(gsIdx, elapsedTime) = prvec;
                 vrvecs(gsIdx, elapsedTime) = {vrvec};
+                end
+                %fprintf('受信機%dの衛星%dに対する%sでの疑似距離は、%s\n', gsIdx, satIdx, currentT, prvec);
+                currentT = currentT + seconds(sampleTime);
+
             end
         end
     end
