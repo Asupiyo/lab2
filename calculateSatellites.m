@@ -1,36 +1,26 @@
-function [gsList,satellitePosData, satelliteVelData,svmat] = calculateSatellites(startTime, stopTime, sampleTime, groundStations, satelliteParams) 
-sc = satelliteScenario(startTime, stopTime, sampleTime);
+function [satellitePosData, satelliteVelData,svmat] = calculateSatellites(startTime, stopTime, sampleTime, gsList, sat) 
 
-gsList = [];
-for i = 1:length(groundStations)
-    gs = groundStation(sc, groundStations(i).Lat, groundStations(i).Lon, Altitude=groundStations(i).Alt);
-    gsList = [gsList; gs];
-end
 
 svxyzmat = zeros(length(gsList), 3);
 
 for gsIdx = 1:length(gsList)
-      gspos = [groundStations(gsIdx).Lat, ...
-               groundStations(gsIdx).Lon, ...
-               groundStations(gsIdx).Alt];
+      gspos = [gsList(gsIdx).Latitude, ...
+               gsList(gsIdx).Longitude, ...
+               gsList(gsIdx).Altitude];
                [x,y,z]= geodetic2ecef(wgs84Ellipsoid,gspos(1),gspos(2),gspos(3));%ECEFに変換(llh2xyz)
                svxyzmat(gsIdx, 1:3) = [x,y,z]; 
 end
 
 % 衛星の追加とアクセス計算
 satList = [];
-accessData = cell(length(satelliteParams), 1);  % 衛星ごとのアクセスデータを保存するためのセル配列
-for i = 1:length(satelliteParams)
-    sat = satellite(sc, satelliteParams(i).SemiMajorAxis, satelliteParams(i).Eccentricity, ...
-        satelliteParams(i).Inclination, satelliteParams(i).RAAN, ...
-        satelliteParams(i).ArgPeriapsis, satelliteParams(i).TrueAnomaly);
-    sat.MarkerColor = satelliteParams(i).Color;
+accessData = cell(length(sat), 1);  % 衛星ごとのアクセスデータを保存するためのセル配列
+for i = 1:length(sat)
     satList = [satList; sat];
 
     timeSteps = startTime:seconds(sampleTime):stopTime;  
     for t = 1:length(timeSteps)
         currentTime = timeSteps(t);
-        [pos, vel] = states(sat, currentTime,"CoordinateFrame","ecef"); % 衛星の位置と速度
+        [pos, vel] = states(sat(i), currentTime,"CoordinateFrame","ecef"); % 衛星の位置と速度
         svmat(i, :, t) = pos; % svmatに位置を格納
         svvmat(i,:,t) = vel;
     end
@@ -43,9 +33,9 @@ for i = 1:length(satelliteParams)
     end
 end
 
-satellitePosData = cell(length(satelliteParams), 1);
-satelliteVelData = cell(length(satelliteParams), 1);
-estimatedPositions = cell(length(satelliteParams), 1);
+satellitePosData = cell(length(satList), 1);
+satelliteVelData = cell(length(satList), 1);
+estimatedPositions = cell(length(satList), 1);
 
 
 for satIdx = 1:length(satList)

@@ -1,51 +1,42 @@
 clear all
-startTime = datetime(2024,11,20,15,00,0);
+startTime = datetime(2024,11,20,00,00,0);
 stopTime = startTime + days(1);
 sampleTime = 10;
+sc = satelliteScenario(startTime, stopTime, sampleTime);
 
 % 地上局リスト
 groundStations = [
-    struct('Lat', 35.6722116666667, 'Lon', 139.528622277778, 'Alt', 50); % 東京
-    struct('Lat', 43.0642, 'Lon', 141.3468, 'Alt', 20); % 札幌
-    struct('Lat', 26.2124, 'Lon', 127.6809, 'Alt', 30);  % 沖縄
-    struct('Lat',35.8818,'Lon',139.828395,'Alt',4.7);
-    struct('Lat',34.8393,'Lon',134.694,'Alt',50.8)
-    struct('Lat',39.86627,'Lon',116.378174,'Alt',0);%北京
-    struct('Lat',-33.985502,'Lon',151.171875,'Alt',0);%シドニー
-    struct('Lat',19.482129,'Lon',-155.545903,'Alt',0);%太平洋
+    struct('Lat', 43.06417, 'Lon', 141.34694, 'Alt', 20);  % 札幌
+    struct('Lat', 35.6895, 'Lon', 139.6917, 'Alt', 40);    % 東京
+    struct('Lat', 34.69374, 'Lon', 135.50218, 'Alt', 50);  % 大阪
+    struct('Lat', 32.7903, 'Lon', 130.7414, 'Alt', 30);    % 熊本
+    struct('Lat', 26.2123, 'Lon', 127.6791, 'Alt', 30);    % 沖縄
+    struct('Lat', 37.4133, 'Lon', 136.91, 'Alt', 25);      % 金沢
+    struct('Lat', 36.2048, 'Lon', 138.2529, 'Alt', 50);    % 長野
+    struct('Lat', 31.5966, 'Lon', 130.5571, 'Alt', 20);    % 鹿児島
 ];
 
-numOrbits = 1; % 軌道の数
-semiMajorAxisBase = 8000000; % 基本の軌道長半径 (m)
-eccentricityBase = 0.01; % 基本の離心率
-inclinationBase = 70; % 基本の傾斜角 (度)
 
-% 色を定義 (色を36色生成)
-colors = jet(numOrbits); % Jetカラーマップを利用
-
-satelliteParams = struct();
-
-for i = 1:numOrbits
-    % パラメータを計算
-    semiMajorAxis = semiMajorAxisBase; % 軌道長半径を少しずつ増加
-    eccentricity = eccentricityBase; % 一定
-    inclination = inclinationBase; % 傾斜角は一定 (70度)
-    raan = 100;%randi([0,359]); % RAANを増加させて360度で折り返し
-    argPeriapsis = 100;%randi([0,359]); % 近地点引数も増加
-    trueAnomaly = 100;%randi([0,359]); % 真近点離角も増加
-    color = colors(i, :); % 色を割り当て
-    
-    % i番目の構造体を作成して、構造体配列に代入
-    satelliteParams(i).SemiMajorAxis = semiMajorAxis;
-    satelliteParams(i).Eccentricity = eccentricity;
-    satelliteParams(i).Inclination = inclination;
-    satelliteParams(i).RAAN = raan;
-    satelliteParams(i).ArgPeriapsis = argPeriapsis;
-    satelliteParams(i).TrueAnomaly = trueAnomaly;
-    satelliteParams(i).Color = color;
+gsList = [];
+for i = 1:length(groundStations)
+    gs = groundStation(sc, groundStations(i).Lat, groundStations(i).Lon, Altitude=groundStations(i).Alt);
+    %gs.MinElevationAngle = 1;
+    gsList = [gsList; gs];
 end
 
-[gsList,satpos,satvel,truepos]=calculateSatellites(startTime,stopTime,sampleTime,groundStations,satelliteParams);
+
+semiMajorAxis = [8000000;8010000;8020000;8030000;8040000;8050000]; % 軌道長半径 (m)
+eccentricity = [0.01; 0.01; 0.01; 0.01;0.01;0.01];              % 離心率
+inclination = [60;60;60;60;60;60];                       % 傾斜角 (度)
+rightAscensionOfAscendingNode = [0;10;20;30;40;50];    % 昇交点赤経 (度)
+argumentOfPeriapsis = [0; 0;0;0;0;0];               % 近地点引数 (度)
+trueAnomaly = [0; 0;0;0;0;0];                      % 真近点離角 (度)
+
+sat = satellite(sc,semiMajorAxis,eccentricity,inclination, ...
+    rightAscensionOfAscendingNode,argumentOfPeriapsis,trueAnomaly);
+
+
+[satpos,satvel,truepos]=calculateSatellites(startTime,stopTime,sampleTime,gsList,sat);
 
 % サンプルのセル配列（各要素がベクトル）
 A = satvel{1};

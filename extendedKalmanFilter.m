@@ -1,20 +1,21 @@
-startTime = datetime(2024,11,20,15,00,0);
+startTime = datetime(2024,11,20,00,00,0);
 stopTime = startTime + days(1);
 sampleTime = 10;
 timeSteps = startTime:seconds(sampleTime):stopTime;
 dt = sampleTime;
 sc = satelliteScenario(startTime, stopTime, sampleTime);
 measureInitialState = [0;0;0;0;0;0];%x,dx,y,dy,z,dz
+measureCollect = cell(length(satpos),1);
 measureStates = zeros(6,length(timeSteps));
-initialCovariance = diag([100,1e3,100,1e3,100,1e3]);
-processNoise = diag([0;.01;0;.01;0;.01]);
+initialCovariance = diag([1e-1,1e-2,1e-1,1e-2,1e-1,1e-2]);
+processNoise = diag([0;1e-2;0;1e-2;0;1e-2]);
 
-measureNoise = diag([2e-6;1;1;2e-6;1;1]);
+measureNoise = diag([2e-6;2e-6;2e-6;2e-6;2e-6;2e-6]);
 estimateStates = NaN(size(measureStates));
-estimatesResults = cell(length(satelliteParams), 1);
+estimatesResults = cell(length(satpos), 1);
 
 
-for satIdx = 1:numOrbits
+for satIdx = 1:length(satpos)
  %   prvec = satellitePosData{satIdx}; % [地上局数 x 時間ステップ数]
   %  vrvec = satelliteVelData{satIdx}; % [地上局数 x 時間ステップ数]
 
@@ -46,41 +47,43 @@ for satIdx = 1:numOrbits
             prvecValid = prvecAtStart(validIdx,:);
             svxyzmatValid = svxyzmat(validIdx,:);
             estusr = olspos(prvecValid,svxyzmatValid,measureStates([1,3,5],j-1));
-
+        
             % 推定された位置を衛星ごとのリストに追加
             %satelliteEstimatedPositions{1,j} = estusr(1,1:3);  % 位置推定結果を追加
+            if(abs(estusr(1))<= 10^10)
             measureStates(1,j) = estusr(1,1);
             measureStates(3,j) = estusr(1,2);
             measureStates(5,j) = estusr(1,3);
             measureStates(2,j) = meanResults{j}(1);
             measureStates(4,j) = meanResults{j}(2);
             measureStates(6,j) = meanResults{j}(3);
+            end
         end
     end
-
-
+measureCollect{satIdx} = measureStates;
+end
 %%ここから先がEKF
-filter = trackingEKF(State=measureStates(:,1),StateCovariance=initialCovariance,...
-        StateTransitionFcn=@stateModel,ProcessNoise=processNoise,...
-    MeasurementFcn=@measureModel,MeasurementNoise=measureNoise);
+%filter = trackingEKF(State=measureStates(:,1),StateCovariance=initialCovariance,...
+ %       StateTransitionFcn=@stateModel,ProcessNoise=processNoise,...
+ %   MeasurementFcn=@measureModel,MeasurementNoise=measureNoise);
 
-for i=2:length(timeSteps)
-    isPredicting = false;
-    value=measureStates(:,i);
-    zerosum = sum(value == 0);
-    if zerosum <= 3
-        if ~isPredicting
-            filter.State = value;
-            isPredicting = true;
-        end
-        predict(filter,dt);
-        estimateStates(:,i) = correct(filter,measureStates(:,i));
-    else
-        isPredicting = false;
-    end
-end
-estimatesResults{satIdx,1} = estimateStates;
-end
+%for i=2:length(timeSteps)
+ %   isPredicting = false;
+  %  value=measureStates(:,i);
+   % zerosum = sum(value == 0);
+   % if zerosum <= 3
+%        if ~isPredicting
+ %           filter.State = value;
+  %          isPredicting = true;
+   %     end
+    %    predict(filter,dt);
+     %   estimateStates(:,i) = correct(filter,measureStates(:,i));
+    %else
+%        isPredicting = false;
+%   end
+%end
+%estimatesResults{satIdx,1} = estimateStates;
+%end
 
 function stateNext = stateModel(state,dt)
     F = [1 dt 0 0 0 0;
