@@ -55,17 +55,17 @@ vrvecs = cell(size(vrvec));
             currentT = startT;
             while currentT <= endT
                 elapsedTime = seconds(currentT - starttime) / sampleTime; 
-                svenu = xyz2enu(svmat(i,:,elapsedTime)',gsPos);
-                el = (180/pi)*atan2(svenu(3),norm(svenu(1:2)));
-                if el >= 5
                 if elapsedTime ~= 0
+                %svenu = xyz2enu(svmat(satIdx,:,elapsedTime)',gsPos);
+                %el = (180/pi)*atan2(svenu(3),norm(svenu(1:2)));
+                %if el >= 5
                 svmat_t = squeeze(svmat(satIdx, :, elapsedTime)); % 衛星の位置 [1 x 3]
                 vrvec = squeeze(svvmat(satIdx, :, elapsedTime));
                 [prvec, ~] = genrng(1, gsPos, svmat_t, satIdx, t * elapsedTime, 0);
                 prvecs(gsIdx, elapsedTime) = prvec;
                 vrvecs(gsIdx, elapsedTime) = {vrvec};
                 end
-                end
+                %end
                 %fprintf('受信機%dの衛星%dに対する%sでの疑似距離は、%s\n', gsIdx, satIdx, currentT, prvec);
                 currentT = currentT + seconds(sampleTime);
 

@@ -1,20 +1,20 @@
 clear all
-load("satellite12.mat");
+load("satellite16.mat");
 %sndemo5見直す
 svxyzmat = [];
 svid = [];
 mpmat = mpgen(100,3600,1,54321);
-usrxyz = llh2xyz([35.65606806*pi/180,139.54404914*pi/180,10]);%ECEFに変換(llh2xyz)
+ usrxyz = llh2xyz([35.65606806*pi/180,139.54404914*pi/180,10]);%ECEFに変換(llh2xyz)
 enuerr = [];
-countsat = [];
-seesat = {};
+ countsat = [];
+ seesat = {};
 count = 0;
 
-loadgps
-i=1;
-randn('state',9083247);
-bar1 = waitbar(0,'Calculating Position...   ');
-for t = 1:1:180,
+ loadgps
+ i=1;
+ randn('state',9083247);
+  bar1 = waitbar(0,'Calculating Position...   ');
+for t = 1:1:180
     [svxyzmat,svid] = gensv(usrxyz,t*10,30);  % Note the mask angle is set to 2 degrees
     for j=1:12
       if measureCollect{j}([1,t]) ~= 0
@@ -23,6 +23,7 @@ for t = 1:1:180,
       if el >= 30
         svxyzmat = [svxyzmat;(measureCollect{j}([1,3,5],t))'];
         svid = [svid,40+j];
+        poskurabe{t,j} = [(measureCollect{j}([1],t))',truepos(j,1,t)];
       end
       end
     end%衛星数が3台の時のエラー対策

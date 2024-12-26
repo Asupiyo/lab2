@@ -4,7 +4,7 @@
 usrxyz(1:3) = [x,y,z];
 loadgps
 
-for t = 1:1:180,
+for t = 1:1:180
   [svxyzmat,svid] = gensv(usrxyz,t*10,30);
   for j=1:12
       svenu = xyz2enu(measureCollect{j}([1,3,5],t)',usrxyz);
