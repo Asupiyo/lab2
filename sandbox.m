@@ -1,7 +1,7 @@
 clear all
-startTime = datetime(2024,12,16,00,00,0);
-stopTime = startTime + days(1);
-sampleTime = 10;
+startTime = datetime(2024,12,23,12,00,0);
+stopTime = datetime(2024,12,23,17,00,0);
+sampleTime = 10; % サンプリング間隔（秒）
 sc = satelliteScenario(startTime, stopTime, sampleTime);
 
 % 地上局リスト
@@ -25,14 +25,12 @@ for i = 1:length(groundStations)
 end
 
 
-semiMajorAxis = [8100000;7000000;7100000;7200000;7300000;7400000;7500000;7600000;7700000;7800000;7900000;8000000;7777777;8200000;7788999;8019999];
-eccentricity = [0.01;0.01;0.01;0.01;0.01;0.01;0.01;0.01;0.01;0.01;0.01;0.01;0.01;0.01;0.01;0.01];
-inclination = [0;10;15;30;45;50;60;75;90;105;120;125;135;150;165;185];
-rightAscensionOfAscendingNode = [0;10;15;30;45;50;60;75;90;105;120;125;135;150;165;185];
-argumentOfPeriapsis = [288,163,156,297,39,48,62,141,300,290,21,144,190,150,237,226];
-trueAnomaly = [0;10;15;30;45;50;60;75;90;105;120;125;135;150;165;185];
-             % 真近点離角 (度)
-
+semiMajorAxis = [8000000;8010000;8020000;8030000;8040000;8050000;7000000;7100000;7200000;7300000;7400000;7500000]; % 軌道長半径 (m)
+eccentricity = [0.01; 0.01; 0.01; 0.01;0.01;0.01;0.01; 0.01; 0.01; 0.01;0.01;0.01];              % 離心率
+inclination = [60;60;60;60;60;60;95;95;95;95;95;95];                       % 傾斜角 (度)
+rightAscensionOfAscendingNode = [30;35;40;45;50;55;50;55;60;65;70;75];    % 昇交点赤経 (度)
+argumentOfPeriapsis = [0; 0;0;0;0;0;0;0;0;0;0;0];               % 近地点引数 (度)
+trueAnomaly = [0; 0;0;0;0;0;0;0;0;0;0;0];      
 sat = satellite(sc,semiMajorAxis,eccentricity,inclination, ...
     rightAscensionOfAscendingNode,argumentOfPeriapsis,trueAnomaly);
 
