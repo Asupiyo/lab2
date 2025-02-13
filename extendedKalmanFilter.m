@@ -49,62 +49,20 @@ for satIdx = 1:length(satpos)
             if j == 1
                 estusr = olspos(prvecValid,svxyzmatValid);
             else
-              estusr = olspos(prvecValid,svxyzmatValid,measureStates([1,3,5],j-1));
+              estusr = olspos(prvecValid,svxyzmatValid,measureStates([1,2,3],j-1));
             end
         
             % 推定された位置を衛星ごとのリストに追加
             %satelliteEstimatedPositions{1,j} = estusr(1,1:3);  % 位置推定結果を追加
             if(abs(estusr(1))<= 10^10)
             measureStates(1,j) = estusr(1,1);
-            measureStates(3,j) = estusr(1,2);
-            measureStates(5,j) = estusr(1,3);
-            measureStates(2,j) = meanResults{j}(1);
-            measureStates(4,j) = meanResults{j}(2);
-            measureStates(6,j) = meanResults{j}(3);
+            measureStates(2,j) = estusr(1,2);
+            measureStates(3,j) = estusr(1,3);
+            %measureStates(4,j) = meanResults{j}(1);
+            %measureStates(5,j) = meanResults{j}(2);
+            %measureStates(6,j) = meanResults{j}(3);
             end
         end
     end
 measureCollect{satIdx} = measureStates;
-end
-%%ここから先がEKF
-%filter = trackingEKF(State=measureStates(:,1),StateCovariance=initialCovariance,...
- %       StateTransitionFcn=@stateModel,ProcessNoise=processNoise,...
- %   MeasurementFcn=@measureModel,MeasurementNoise=measureNoise);
-
-%for i=2:length(timeSteps)
- %   isPredicting = false;
-  %  value=measureStates(:,i);
-   % zerosum = sum(value == 0);
-   % if zerosum <= 3
-%        if ~isPredicting
- %           filter.State = value;
-  %          isPredicting = true;
-   %     end
-    %    predict(filter,dt);
-     %   estimateStates(:,i) = correct(filter,measureStates(:,i));
-    %else
-%        isPredicting = false;
-%   end
-%end
-%estimatesResults{satIdx,1} = estimateStates;
-%end
-
-function stateNext = stateModel(state,dt)
-    F = [1 dt 0 0 0 0;
-        0 1 0 0 0 0;
-        0 0 1 dt 0 0;
-        0 0 0 1 0 0;
-        0 0 0 0 1 dt;
-        0 0 0 0 0 1];
-    stateNext = F*state;
-end
-
-function z = measureModel(state)
-    x = state(1);
-    dx = state(2);
-    y = state(3);
-    dy = state(4);
-    z = state(5);
-    dz = state(6);
-    z = [x;dx;y;dy;z;dz];
 end

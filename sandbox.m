@@ -25,17 +25,18 @@ for i = 1:length(groundStations)
 end
 
 
-semiMajorAxis = [8000000;8010000;8020000;8030000;8040000;8050000;7000000;7100000;7200000;7300000;7400000;7500000]; % 軌道長半径 (m)
-eccentricity = [0.01; 0.01; 0.01; 0.01;0.01;0.01;0.01; 0.01; 0.01; 0.01;0.01;0.01];              % 離心率
-inclination = [60;60;60;60;60;60;95;95;95;95;95;95];                       % 傾斜角 (度)
-rightAscensionOfAscendingNode = [30;35;40;45;50;55;50;55;60;65;70;75];    % 昇交点赤経 (度)
-argumentOfPeriapsis = [0; 0;0;0;0;0;0;0;0;0;0;0];               % 近地点引数 (度)
-trueAnomaly = [0; 0;0;0;0;0;0;0;0;0;0;0];      
+semiMajorAxis = [8000000;8010000;8020000;8030000;8040000;8050000];% 軌道長半径 (m)
+eccentricity = [0.01; 0.01; 0.01; 0.01;0.01;0.01];              % 離心率
+inclination = [280;280;280;280;280;280];                       % 傾斜角 (度)
+rightAscensionOfAscendingNode = [50;55;60;65;70;75];    % 昇交点赤経 (度)
+argumentOfPeriapsis = [0;0;0;0;0;0];               % 近地点引数 (度)
+trueAnomaly = [-85;-80;-75;-70;-65;-60]; 
+
 sat = satellite(sc,semiMajorAxis,eccentricity,inclination, ...
     rightAscensionOfAscendingNode,argumentOfPeriapsis,trueAnomaly);
 
 
-[satpos,satvel,truepos]=calculateSatellites(startTime,stopTime,sampleTime,gsList,sat);
+[satpos,satvel,truepos,~,prnoisarr,troperrarr,mperrprarr,ionoerrarr]=calculateSatellites(startTime,stopTime,sampleTime,gsList,sat);
 
 % サンプルのセル配列（各要素がベクトル）
 A = satvel{1};
